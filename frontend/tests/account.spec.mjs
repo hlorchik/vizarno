@@ -1,0 +1,42 @@
+import { test, expect } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
+
+test('продавец меняет пароль и удаляет свой тестовый аккаунт', async ({ page }) => {
+  const email = `browser-${randomUUID()}@example.test`;
+  const password = randomUUID();
+  const nextPassword = randomUUID();
+  await page.goto(process.env.VIZARNO_TEST_URL || 'http://127.0.0.1:5188');
+  const login = async (secret) => {
+    await page.getByLabel('Электронная почта').fill(email);
+    await page.getByLabel('Пароль', { exact: true }).fill(secret);
+    await page.getByRole('button', { name: 'Войти', exact: true }).click();
+  };
+  await page.getByRole('button', { name: 'Создать аккаунт' }).click();
+  await page.getByLabel('Электронная почта').fill(email);
+  await page.getByLabel('Пароль', { exact: true }).fill(password);
+  await page.getByRole('button', { name: 'Зарегистрироваться' }).click();
+  await page.getByRole('button', { name: 'Выйти' }).click();
+  await login(password);
+  const account = page.getByRole('link', { name: 'Личный кабинет' });
+  await account.click();
+  await expect(page.getByText(email, { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Сохранённые серии'})).toBeVisible();
+  await page.getByRole('link',{name:'Настройки',exact:true}).click();
+  await page.getByText('Сменить пароль', { exact: true }).click();
+  const change = page.locator('details[open]');
+  await change.getByLabel('Текущий пароль').fill(password);
+  await change.getByLabel('Новый пароль', { exact: true }).fill(nextPassword);
+  await change.getByLabel('Повторите новый пароль').fill(nextPassword);
+  await change.getByRole('button', { name: 'Сохранить пароль' }).click();
+  await login(nextPassword);
+  await account.click();
+  await page.getByRole('link',{name:'Настройки',exact:true}).click();
+  await page.getByText('Удалить аккаунт', { exact: true }).click();
+  const remove = page.locator('details[open]');
+  await remove.getByLabel('Текущий пароль').fill(nextPassword);
+  await remove.getByRole('checkbox').check();
+  await remove.getByRole('button', { name: 'Удалить аккаунт навсегда' }).click();
+  await expect(page.getByRole('status')).toHaveText('Аккаунт удалён.');
+  await login(nextPassword);
+  await expect(page.getByRole('alert')).toContainText('Проверьте email и пароль');
+});
