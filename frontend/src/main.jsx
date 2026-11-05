@@ -32,7 +32,7 @@ function Auth({onLogin}) {
       await onLogin();
     } catch (err) {setError(err.message)} finally {setBusy(false)}
   }
-  return <section className="auth"><div><small>СТУДИЯ КАРТОЧКИ ТОВАРА</small><h1>Обложка<br/>под лупой<span>.</span></h1><p>Посмотрите, как товар выглядит в миниатюре. Проверьте файл и сравните обложку до и после правок.</p></div>
+  return <section className="auth"><div><small>СТУДИЯ КАРТОЧКИ ТОВАРА</small><h1>Карточка<br/>в фокусе<span>.</span></h1><p>Проверьте карточку глазами покупателя, получите рекомендации и создайте улучшенную серию изображений.</p></div>
     <form onSubmit={submit}><small>КАБИНЕТ ПРОДАВЦА</small><h2>{signup?'Создать кабинет':'Войти в кабинет'}</h2>
     <label>Электронная почта<input name="Email" type="email" autoComplete="email" required/></label>
     <label>Пароль<input name="Password" type="password" minLength="8" autoComplete={signup?'new-password':'current-password'} required/></label>
